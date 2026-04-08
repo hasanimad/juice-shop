@@ -1,0 +1,30 @@
+# .github/workflows/semgrep-sast.yml
+name: Semgrep SAST
+
+on:
+  # Trigger the workflow on every push to any branch
+  push:
+    branches: ["**"]
+  # Also allow manual triggering for testing purposes
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Semgrep Analysis
+    runs-on: ubuntu-latest
+    
+    # Skip analysis on the semgrep-sast.yml file itself to avoid recursive loops if needed
+    # though typically not an issue for simple push events.
+    
+    container:
+      image: returntocorp/semgrep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep scan
+        run: |
+          # Use the 'p/default' ruleset which covers general security best practices
+          # --error flag makes the job fail if findings are found (optional)
+          semgrep scan --config auto --text
